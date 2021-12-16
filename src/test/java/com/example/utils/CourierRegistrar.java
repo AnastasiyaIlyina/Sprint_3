@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import static io.restassured.RestAssured.given;
 
 
-public class CourierRegistrar {
+public class CourierRegistrar extends ScooterBaseURL {
+
+    private static final String COURIER_URI = "api/v1/courier";
 
     public ArrayList<String> registerRandomCredentialsCourier() {
         String courierLogin = RandomStringUtils.randomAlphabetic(10);
@@ -37,12 +39,9 @@ public class CourierRegistrar {
                 + "\"firstName\":" + preprocessedFirstName + "}";
 
         return given()
-                .header("Content-type", "application/json")
-                .and()
+                .spec(getBaseSpec())
                 .body(registerRequestBody)
                 .when()
-                .post("https://qa-scooter.praktikum-services.ru/api/v1/courier");
+                .post(COURIER_URI);
     }
-
-
 }

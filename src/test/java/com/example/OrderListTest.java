@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class OrderListTest {
@@ -47,28 +48,23 @@ public class OrderListTest {
     }
 
     @Test
-    public void LoginCourierResponseOk() {
+    public void getCourierOrderList() {
         Response response = courierAuthenticator.loginCourier(randomCourierLoginPass.get(0), randomCourierLoginPass.get(1));
-        Integer courierId = response.path("id");
+        Integer courierId = response.then().extract().path("id");
 
         response = orderCreator.createNewOrder(firstName, lastName, address, metroStation, phone, rentTime, deliveryDate, comment, color);
-        Integer track = response.path("track");
+        Integer track = response.then().extract().path("track");
 
         response = orderHelper.getOrderId(track);
-        Integer orderId = response.path("order.id");
+        Integer orderId = response.then().extract().path("order.id");
 
-        response = courierOrderAcceptor.acceptOrder(orderId, courierId);
-        response.then()
-                .assertThat()
-                .body("ok", equalTo( true))
-                .and()
-                .statusCode(200);
+        courierOrderAcceptor.acceptOrder(orderId, courierId);
 
         response = courierOrderList.getOrderList(courierId);
-        response.then()
-                .assertThat()
-                .body("orders.size()", is(1))
-                .and()
-                .statusCode(200);
+        int statusCodeOrderList = response.statusCode();
+        Integer orderListSize = response.then().extract().path("orders.size()");
+
+        assertThat("Status code is incorrect", statusCodeOrderList, equalTo( 200));
+        assertThat("Order list size is incorrect", orderListSize, is(1));
     }
 }

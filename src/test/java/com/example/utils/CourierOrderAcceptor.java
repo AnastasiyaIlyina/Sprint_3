@@ -5,13 +5,14 @@ import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 
 
-public class CourierOrderAcceptor {
+public class CourierOrderAcceptor extends ScooterBaseURL{
+    private static final String ORDER_ACCEPTOR_URI = "api/v1/orders/accept/";
 
-    public Response acceptOrder(Integer trackId, Integer courierId){
-
-        return given()
-                .header("Content-type", "application/json")
+    public void acceptOrder(Integer trackId, Integer courierId){
+        given()
+                .spec(getBaseSpec())
+                .queryParam("courierId", courierId)
                 .when()
-                .put("https://qa-scooter.praktikum-services.ru/api/v1/orders/accept/"+ trackId.toString() + "?courierId=" + courierId.toString());
+                .put(ORDER_ACCEPTOR_URI + trackId);
     }
 }

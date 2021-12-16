@@ -5,7 +5,9 @@ import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 
 
-public class CourierAuthenticator {
+public class CourierAuthenticator extends ScooterBaseURL {
+
+    private static final String LOGIN_URI = "/api/v1/courier/login";
 
     public Response loginCourier(String login, String password){
         String preprocessedLogin = login == null ? "null" : "\"" + login + "\"";
@@ -14,10 +16,9 @@ public class CourierAuthenticator {
                 + "\"password\":" + preprocessedPassword + "}";
 
         return given()
-                .header("Content-type", "application/json")
-                .and()
+                .spec(getBaseSpec())
                 .body(loginRequestBody)
                 .when()
-                .post("https://qa-scooter.praktikum-services.ru/api/v1/courier/login");
+                .post(LOGIN_URI);
     }
 }

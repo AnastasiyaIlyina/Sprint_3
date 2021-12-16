@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -25,7 +26,6 @@ public class CourierAuthorizationTest {
         randomCourierLoginPass = courierRegistrar.registerRandomCredentialsCourier();
     }
 
-
     @After
     public void afterTests() {
         var courierRemover = new CourierRemover();
@@ -33,57 +33,52 @@ public class CourierAuthorizationTest {
     }
 
     @Test
-    public void LoginCourierResponseOk() {
+    public void courierCanLogIn() {
         Response response = courierAuthenticator.loginCourier(randomCourierLoginPass.get(0), randomCourierLoginPass.get(1));
-        response.then()
-            .assertThat()
-            .body("id", notNullValue())
-            .and()
-            .statusCode(200);
+        int statusCode = response.statusCode();
+        var courierId= response.then().extract().body();
+
+        assertThat("Status code is incorrect", statusCode, equalTo( 200));
+        assertThat("Courier ID is not created", courierId, notNullValue());
     }
 
     @Test
-    public void LoginWithoutLoginCouriersReturnBadRequest() {
+    public void courierCannotLogInWithoutLogin() {
         Response response = courierAuthenticator.loginCourier(null, randomCourierLoginPass.get(1));
-        response.then()
-                .assertThat()
-                .body("message", equalTo("Недостаточно данных для входа"))
-                .and()
-                .statusCode(400);
+        int statusCode = response.statusCode();
+        String errorMessage= response.then().extract().path("message");
+
+        assertThat("Status code is incorrect", statusCode, equalTo( 400));
+        assertThat("Error Message is incorrect", errorMessage, equalTo("Недостаточно данных для входа"));
     }
 
     @Test
-    public void LoginWithoutPasswordCouriersReturnBadRequest() {
+    public void courierCannotLogInWithoutPassword() {
         Response response = courierAuthenticator.loginCourier(randomCourierLoginPass.get(0), null);
-        response.then()
-                .assertThat()
-                .body("message", equalTo("Недостаточно данных для входа"))
-                .and()
-                .statusCode(400);
+        int statusCode = response.statusCode();
+        assertThat("Status code is incorrect", statusCode, equalTo( 400));
+
+        String errorMessage = response.then().extract().path("message");
+        assertThat("Error Message is incorrect", errorMessage, equalTo("Недостаточно данных для входа"));
     }
 
     @Test
-    public void LoginWithWrongLoginCouriersReturnBadRequest() {
+    public void courierCannotLogInWithWrongLogin() {
         Response response = courierAuthenticator.loginCourier("WrongLogin", randomCourierLoginPass.get(1));
-        response.then()
-                .assertThat()
-                .body("message", equalTo("Учетная запись не найдена"))
-                .and()
-                .statusCode(404);
+        int statusCode = response.statusCode();
+        String errorMessage= response.then().extract().path("message");
+
+        assertThat("Status code is incorrect", statusCode, equalTo( 404));
+        assertThat("Error Message is incorrect", errorMessage, equalTo("Учетная запись не найдена"));
     }
 
     @Test
-    public void LoginWithWrongPasswordCouriersReturnBadRequest() {
+    public void courierCannotLogInWithWrongPassword() {
         Response response = courierAuthenticator.loginCourier(randomCourierLoginPass.get(0), "WrongPass");
-        response.then()
-                .assertThat()
-                .body("message", equalTo("Учетная запись не найдена"))
-                .and()
-                .statusCode(404);
+        int statusCode = response.statusCode();
+        String errorMessage= response.then().extract().path("message");
+
+        assertThat("Status code is incorrect", statusCode, equalTo( 404));
+        assertThat("Error Message is incorrect", errorMessage, equalTo("Учетная запись не найдена"));
     }
-
-
 }
-
-
-

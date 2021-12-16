@@ -5,7 +5,8 @@ import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 
 
-public class OrderCreator {
+public class OrderCreator extends ScooterBaseURL{
+    private static final String Order_URI = "api/v1/orders";
     public Response createNewOrder(String firstName, String lastName, String address, String metroStation, String phone, Number rentTime, String deliveryDate, String comment, String[] colors) {
 
         String createOrderRequestBody = "{\"firstName\":\"" + firstName + "\","
@@ -19,11 +20,10 @@ public class OrderCreator {
                 + "\"color\":[" + buildColorJsonString(colors) + "]}";
 
         return given()
-                .header("Content-type", "application/json")
-                .and()
+                .spec(getBaseSpec())
                 .body(createOrderRequestBody)
                 .when()
-                .post("https://qa-scooter.praktikum-services.ru/api/v1/orders");
+                .post(Order_URI);
     }
 
     public String buildColorJsonString(String[] colors) {
